@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MCP Inspector</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+  <div class="glow-1"></div>
+  <div class="glow-2"></div>
+
+  <header>
+    <div class="logo">
+      <div class="logo-mark">⬡</div>
+      <div class="logo-name">MCP INSPECTOR <span>v1.0</span></div>
+    </div>
+    <div class="server-badge" id="server-badge">connecting...</div>
+  </header>
+
+  <div class="shell">
+
+    <!-- Stats -->
+    <div class="stats">
+      <div class="stat-card">
+        <div class="stat-label">Server</div>
+        <div class="stat-value" id="stat-server" style="font-size:16px; color:var(--tx-2)">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Tools</div>
+        <div class="stat-value cyan" id="stat-tools">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Resources</div>
+        <div class="stat-value green" id="stat-resources">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Prompts</div>
+        <div class="stat-value amber" id="stat-prompts">—</div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" data-panel="tools">
+        ⚡ Tools <span class="tab-badge cyan" id="tab-tools-count">0</span>
+      </button>
+      <button class="tab" data-panel="resources">
+        ◆ Resources <span class="tab-badge green" id="tab-resources-count">0</span>
+      </button>
+      <button class="tab" data-panel="prompts">
+        ◈ Prompts <span class="tab-badge amber" id="tab-prompts-count">0</span>
+      </button>
+    </div>
+
+    <!-- Tools Panel -->
+    <div class="panel active" id="panel-tools">
+      <div class="loading" id="loading-tools">
+        <div class="spinner"></div>
+        <div style="color:var(--tx-3)">Loading tools...</div>
+      </div>
+      <div class="card-grid" id="grid-tools"></div>
+    </div>
+
+    <!-- Resources Panel -->
+    <div class="panel" id="panel-resources">
+      <div class="loading" id="loading-resources">
+        <div class="spinner"></div>
+        <div style="color:var(--tx-3)">Loading resources...</div>
+      </div>
+      <div class="card-grid" id="grid-resources"></div>
+    </div>
+
+    <!-- Prompts Panel -->
+    <div class="panel" id="panel-prompts">
+      <div class="loading" id="loading-prompts">
+        <div class="spinner"></div>
+        <div style="color:var(--tx-3)">Loading prompts...</div>
+      </div>
+      <div class="card-grid" id="grid-prompts"></div>
+    </div>
+
+  </div>
+
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
