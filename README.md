@@ -1,4 +1,4 @@
-# ⬡ MCP Inspector
+# ⬡ MCP Dashboard
 
 A lightweight Flask dashboard for inspecting MCP servers. Instead of reading config files or guessing what an MCP server exposes, you can point this at any MCP server and instantly browse its tools, resources, and prompts in one place.
 
