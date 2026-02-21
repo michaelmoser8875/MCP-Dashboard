@@ -19,8 +19,6 @@ Point it at any MCP server and it will:
 pip install flask
 ```
 
-That's it. No other dependencies.
-
 ## Usage
 
 ```bash
