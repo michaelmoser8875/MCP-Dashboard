@@ -68,6 +68,22 @@ mcp_inspector/
 
 The inspector launches your MCP server as a subprocess and talks to it over **stdio** using the MCP JSON-RPC protocol. It sends `initialize`, then queries `tools/list`, `resources/list`, and `prompts/list` to discover what the server offers. The Flask app serves a dashboard that displays everything and lets you interact with it.
 
+## Contributing
+
+Contributions are welcome! If you'd like to improve the dashboard, fork the repo and open a pull request.
+
+If you find a bug:
+
+1. Check the [existing issues](../../issues) to see if it's already reported
+2. If not, open a new issue with:
+   - What MCP server you were inspecting
+   - The command you ran
+   - The error message or unexpected behavior
+   - Your Python version
+3. Include a screenshot of the dashboard if it's a UI bug
+
+Feature ideas and suggestions are welcome too — just open an issue.
+
 ## License
 
 MIT
