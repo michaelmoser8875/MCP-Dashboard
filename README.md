@@ -1,6 +1,6 @@
 # ⬡ MCP Inspector
 
-A web dashboard that connects to any MCP server and shows you what's inside — tools, resources, and prompts — in a clean visual interface.
+A lightweight Flask dashboard for inspecting MCP servers. Instead of reading config files or guessing what an MCP server exposes, you can point this at any MCP server and instantly browse its tools, resources, and prompts in one place.
 
 ![Python](https://img.shields.io/badge/python-3.10+-blue) ![Flask](https://img.shields.io/badge/flask-required-green) ![License](https://img.shields.io/badge/license-MIT-gray)
 
