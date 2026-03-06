@@ -34,16 +34,15 @@ function renderTools(tools) {
     if (paramCount) {
       paramsHtml = '<div class="schema-block">' + Object.entries(props).map(([name, prop]) => {
         const isReq = required.includes(name);
+        const ph = (prop.description || name).slice(0, 60);
         return `<div class="param-row">
-          <span class="param-name">${escHtml(name)}</span>
-          <span class="param-type">${escHtml(prop.type || 'any')}</span>
-          ${isReq ? '<span class="param-req">REQUIRED</span>' : ''}
-          ${prop.description ? `<span class="param-desc">— ${escHtml(prop.description)}</span>` : ''}
+          <label class="param-label"><span class="param-name">${escHtml(name)}</span> ${isReq ? '<span class="param-req">REQUIRED</span>' : ''}</label>
+          <input class="param-input" data-param="${escHtml(name)}" placeholder="${escHtml(ph)}" />
         </div>`;
       }).join('') + '</div>';
     }
 
-    return `<div class="card">
+    return `<div class="card" data-tool-name="${escHtml(t.name)}">
       <div class="card-head">
         <div class="card-icon tool">⚡</div>
         <div class="card-info">
@@ -54,7 +53,7 @@ function renderTools(tools) {
       <div class="card-body">
         ${paramCount ? `<div style="font: 500 10px var(--mono); color: var(--tx-3); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 2px;">${paramCount} parameter${paramCount > 1 ? 's' : ''}</div>` : ''}
         ${paramsHtml}
-        <button class="try-btn" onclick="tryTool('${escHtml(t.name)}', this)">▶ Try it</button>
+        <button class="try-btn" onclick="tryTool(this)">▶ Try it</button>
         <div class="result-block" id="result-tool-${i}"></div>
       </div>
     </div>`;
@@ -105,15 +104,15 @@ function renderPrompts(prompts) {
     let argsHtml = '';
     if (args.length) {
       argsHtml = '<div class="schema-block">' + args.map(a => {
+        const ph = (a.description || a.name).slice(0, 60);
         return `<div class="param-row">
-          <span class="param-name">${escHtml(a.name)}</span>
-          ${a.required ? '<span class="param-req">REQUIRED</span>' : ''}
-          ${a.description ? `<span class="param-desc">— ${escHtml(a.description)}</span>` : ''}
+          <label class="param-label"><span class="param-name">${escHtml(a.name)}</span> ${a.required ? '<span class="param-req">REQUIRED</span>' : ''}</label>
+          <input class="param-input" data-param="${escHtml(a.name)}" placeholder="${escHtml(ph)}" />
         </div>`;
       }).join('') + '</div>';
     }
 
-    return `<div class="card">
+    return `<div class="card" data-prompt-name="${escHtml(p.name)}">
       <div class="card-head">
         <div class="card-icon prompt">◈</div>
         <div class="card-info">
@@ -124,7 +123,7 @@ function renderPrompts(prompts) {
       <div class="card-body">
         ${args.length ? `<div style="font: 500 10px var(--mono); color: var(--tx-3); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 2px;">${args.length} argument${args.length > 1 ? 's' : ''}</div>` : ''}
         ${argsHtml}
-        <button class="try-btn" onclick="getPrompt('${escHtml(p.name)}', this)">◈ Get</button>
+        <button class="try-btn" onclick="getPrompt(this)">◈ Get</button>
         <div class="result-block" id="result-prompt-${i}"></div>
       </div>
     </div>`;
@@ -132,16 +131,28 @@ function renderPrompts(prompts) {
 }
 
 // ── API Calls ──
-async function tryTool(name, btn) {
+function collectArgs(card, selector) {
+  const args = {};
+  (card.querySelectorAll(selector || '.param-input') || []).forEach(inp => {
+    const k = inp.dataset?.param;
+    if (k) args[k] = inp.value.trim();
+  });
+  return args;
+}
+
+async function tryTool(btn) {
+  const card = btn.closest('.card');
+  const name = card?.dataset?.toolName;
   const block = btn.nextElementSibling;
   block.style.display = 'block';
   block.textContent = 'Calling tool...';
   block.style.color = 'var(--tx-3)';
+  const args = name ? collectArgs(card) : {};
   try {
     const res = await fetch('/api/tools/call', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, arguments: {} })
+      body: JSON.stringify({ name, arguments: args })
     });
     const data = await res.json();
     block.textContent = JSON.stringify(data, null, 2);
@@ -172,16 +183,19 @@ async function readResource(uri, btn) {
   }
 }
 
-async function getPrompt(name, btn) {
+async function getPrompt(btn) {
+  const card = btn.closest('.card');
+  const name = card?.dataset?.promptName;
   const block = btn.nextElementSibling;
   block.style.display = 'block';
   block.textContent = 'Getting prompt...';
   block.style.color = 'var(--tx-3)';
+  const args = name ? collectArgs(card) : {};
   try {
     const res = await fetch('/api/prompts/get', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, arguments: {} })
+      body: JSON.stringify({ name, arguments: args })
     });
     const data = await res.json();
     block.textContent = JSON.stringify(data, null, 2);

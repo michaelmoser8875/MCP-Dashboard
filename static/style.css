@@ -149,11 +149,19 @@ header {
 .schema-block::-webkit-scrollbar { width: 4px; height: 4px; }
 .schema-block::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius: 4px; }
 
-.param-row { display: flex; align-items: baseline; gap: 8px; padding: 4px 0; flex-wrap: wrap; }
+.param-row { padding: 6px 0; }
+.param-label { display: block; margin-bottom: 4px; }
 .param-name { color: var(--cyan); font-weight: 500; }
 .param-type { color: var(--violet); font-size: 11px; }
 .param-req  { color: var(--rose); font-size: 9px; letter-spacing: 0.5px; font-weight: 600; }
 .param-desc { color: var(--tx-3); font-size: 11.5px; font-family: var(--sans); }
+.param-input {
+  width: 100%; padding: 8px 12px; margin-top: 2px;
+  font: 400 12px var(--mono); color: var(--tx-1); background: var(--bg-0);
+  border: 1px solid var(--border); border-radius: 6px;
+}
+.param-input::placeholder { color: var(--tx-3); }
+.param-input:focus { outline: none; border-color: var(--cyan); }
 
 /* ── URI tag ── */
 .uri-tag {
