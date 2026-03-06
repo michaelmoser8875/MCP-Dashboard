@@ -36,6 +36,9 @@ python app.py -- npx -y @modelcontextprotocol/server-filesystem /tmp
 # Your own Python MCP server
 python app.py -- python my_server.py
 
+# FastMCP server (e.g. MCP-Server with tool, resource, prompt)
+python app.py -- path/to/MCP-Server/.venv/bin/python path/to/MCP-Server/server.py
+
 # A uv-managed server
 python app.py -- uvx mcp-server-git --repository ./my-repo
 

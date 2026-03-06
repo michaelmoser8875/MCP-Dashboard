@@ -50,6 +50,9 @@ class MCPInspector:
         )
         self._reader_thread = threading.Thread(target=self._read_loop, daemon=True)
         self._reader_thread.start()
+        # Forward server stderr so errors are visible in the dashboard terminal
+        self._stderr_thread = threading.Thread(target=self._stderr_loop, daemon=True)
+        self._stderr_thread.start()
 
         result = self._send_request("initialize", {
             "protocolVersion": "2024-11-05",
@@ -76,9 +79,7 @@ class MCPInspector:
 
     def _send_request(self, method: str, params: dict = None, timeout: float = 10.0):
         msg_id = self._next_id()
-        msg = {"jsonrpc": "2.0", "id": msg_id, "method": method}
-        if params:
-            msg["params"] = params
+        msg = {"jsonrpc": "2.0", "id": msg_id, "method": method, "params": params if params is not None else {}}
 
         event = threading.Event()
         result_holder = [None]
@@ -156,19 +157,35 @@ class MCPInspector:
             except Exception:
                 break
 
+    def _stderr_loop(self):
+        if self.process and self.process.stderr:
+            try:
+                for line in iter(self.process.stderr.readline, b""):
+                    if line:
+                        sys.stderr.write(f"[MCP server] {line.decode('utf-8', errors='replace')}")
+                        sys.stderr.flush()
+            except Exception:
+                pass
+
     # ── Public query methods ──
 
     def list_tools(self):
         result = self._send_request("tools/list", {})
-        return result.get("tools", []) if result else []
+        if not result or "_error" in result:
+            return []
+        return result.get("tools", result.get("tool", []))
 
     def list_resources(self):
         result = self._send_request("resources/list", {})
-        return result.get("resources", []) if result else []
+        if not result or "_error" in result:
+            return []
+        return result.get("resources", result.get("resource", []))
 
     def list_prompts(self):
         result = self._send_request("prompts/list", {})
-        return result.get("prompts", []) if result else []
+        if not result or "_error" in result:
+            return []
+        return result.get("prompts", result.get("prompt", []))
 
     def call_tool(self, name: str, arguments: dict = None):
         return self._send_request("tools/call", {
