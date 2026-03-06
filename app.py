@@ -87,10 +87,9 @@ class MCPInspector:
         with self._lock:
             self._responses[msg_id] = (event, result_holder)
 
-        raw = json.dumps(msg)
-        content = f"Content-Length: {len(raw)}\r\n\r\n{raw}"
+        raw = json.dumps(msg) + "\n"
         try:
-            self.process.stdin.write(content.encode("utf-8"))
+            self.process.stdin.write(raw.encode("utf-8"))
             self.process.stdin.flush()
         except (BrokenPipeError, OSError):
             return None
@@ -103,15 +102,15 @@ class MCPInspector:
         msg = {"jsonrpc": "2.0", "method": method}
         if params:
             msg["params"] = params
-        raw = json.dumps(msg)
-        content = f"Content-Length: {len(raw)}\r\n\r\n{raw}"
+        raw = json.dumps(msg) + "\n"
         try:
-            self.process.stdin.write(content.encode("utf-8"))
+            self.process.stdin.write(raw.encode("utf-8"))
             self.process.stdin.flush()
         except (BrokenPipeError, OSError):
             pass
 
     def _read_loop(self):
+        # MCP stdio uses newline-delimited JSON (one JSON-RPC message per line)
         buf = b""
         while self.process and self.process.poll() is None:
             try:
@@ -120,28 +119,20 @@ class MCPInspector:
                     break
                 buf += chunk
 
-                while b"\r\n\r\n" in buf:
-                    header_end = buf.index(b"\r\n\r\n")
-                    header = buf[:header_end].decode("utf-8")
-                    content_length = None
-                    for line in header.split("\r\n"):
-                        if line.lower().startswith("content-length:"):
-                            content_length = int(line.split(":")[1].strip())
-                    if content_length is None:
-                        buf = buf[header_end + 4:]
-                        continue
-
-                    body_start = header_end + 4
-                    body_end = body_start + content_length
-
-                    if len(buf) < body_end:
+                while b"\n" in buf or b"\r" in buf:
+                    line_end = buf.find(b"\n")
+                    if line_end == -1:
+                        line_end = buf.find(b"\r")
+                    if line_end == -1:
                         break
-
-                    body = buf[body_start:body_end].decode("utf-8")
-                    buf = buf[body_end:]
-
+                    line = buf[:line_end].decode("utf-8").strip()
+                    buf = buf[line_end + 1:]
+                    if line.startswith("Content-Length:"):
+                        continue
+                    if not line:
+                        continue
                     try:
-                        data = json.loads(body)
+                        data = json.loads(line)
                         msg_id = data.get("id")
                         if msg_id is not None:
                             with self._lock:
